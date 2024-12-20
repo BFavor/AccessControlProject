@@ -31,7 +31,7 @@ function login() {
     //.then((resp) => resp.text())
     .then((resp) => {
      if (resp.status = 500) {
-            alert("Server Errorbitch");
+            alert("Server Error");
         }else if (resp.status = 401){
             alert("Username or Password is incorrect");
         }else if (resp.status = 415){
