@@ -42,7 +42,7 @@ app.get("/query", function (request, response) {
 app.post("/login", function (request, response) {
   let parsedBody = JSON.parse(request.body)
   if (!(parsedBody.hasOwnProperty('username'))){
-    console.long("Incomplete Request")
+    console.log("Incomplete Request")
     response.status(415).send("Incomplete Request")
   }
   let SQL = "SELECT * FROM users WHERE username=" + parsedBody["username"] + ";"
