@@ -3,7 +3,6 @@ var parsedUrl = new URL(window.location.href);
 function query() {
     fetch("http://" + parsedUrl.host + "/query", {
         method: "GET",
-        mode: "no-cors",
     })
     .then((resp) => resp.text())
     .then((data) => {
@@ -15,33 +14,33 @@ function query() {
 }
 
 function login() {
-    let body = JSON.stringify({
-        username: document.getElementById("username").text,
-        password: document.getElementById("password").text
+    let stringifiedBody = JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
     });
-    console.log(body)
+
+    
     fetch("http://" + parsedUrl.host + "/login", {
         method: "POST",
-        mode: "no-cors",
+        // mode: "no-cors",
         headers: {
             "Content-Type": "application/json",
         },
-        body: body
+        body: stringifiedBody
     })
-    .then((resp) => resp.text())
     .then((resp) => {
-        document.href = query.html 
+    if (resp.status == 500) {
+        alert("Server Error");
+    }
+    else if (resp.status == 200){
+        alert("Login Successful!")
+    }
+    else if (resp.status == 401){
+        alert("Username or Password is incorrect");
+
+    }
     })
     .catch((err) => {
         console.log(err);
-     if (resp.status = 500) {
-            alert("Server Error");
-        }else if (resp.status = 401){
-            alert("Username or Password is incorrect");
-        }else {
-            alert("Unknown Error");
-        //}else {
-        //location.href = "http://" + parsedUrl.host + "/query.html";
-        }
     })
 }
