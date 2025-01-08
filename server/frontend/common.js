@@ -15,32 +15,33 @@ function query() {
 }
 
 function login() {
-    let stringifiedBody = JSON.stringify({
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value
+    let body = JSON.stringify({
+        username: document.getElementById("username").text,
+        password: document.getElementById("password").text
     });
-    console.log(stringifiedBody)
+    console.log(body)
     fetch("http://" + parsedUrl.host + "/login", {
         method: "POST",
         mode: "no-cors",
         headers: {
             "Content-Type": "application/json",
         },
-        body: stringifiedBody
+        body: body
     })
-    //.then((resp) => resp.text())
+    .then((resp) => resp.text())
     .then((resp) => {
+        document.href = query.html 
+    })
+    .catch((err) => {
+        console.log(err);
      if (resp.status = 500) {
             alert("Server Error");
         }else if (resp.status = 401){
             alert("Username or Password is incorrect");
-        }else if (resp.status = 415){
-            alert("Unknown Error");
         }else {
-        location.href = "http://" + parsedUrl.host + "/query.html";
+            alert("Unknown Error");
+        //}else {
+        //location.href = "http://" + parsedUrl.host + "/query.html";
         }
-    })
-    .catch((_err) => {
-        console.log(err);
     })
 }
