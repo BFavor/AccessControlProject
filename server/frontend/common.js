@@ -64,21 +64,20 @@ function checkTOTP() {
     })
     .then((resp) => resp.text())
     .then((resp) => {
+        console.log("TOTP Code Successful");
+        location.href = "http://" + parsedUrl.host + "/query.html";
+    })
+    .catch((err) => {
+        console.log(err);
         if (resp.status = 500) {
             console.log("Server Error");
             alert("Server Error");
         }else if (resp.status = 401){
             console.log("TOTP Code Incorrect");
             alert("TOTP Code Incorrect");
-        }else if (resp.status = 415) {
+        }else {
             console.log("Incomplete Request");
             alert("Incomplete Request");
-        } else {
-            console.log("TOTP Code Successful");
-            location.href = "http://" + parsedUrl.host + "/query.html";
         }
-    })
-    .catch((err) => {
-        console.log(err);
     })
 }
