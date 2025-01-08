@@ -10,10 +10,10 @@ CREATE TABLE users (
     PRIMARY KEY (username)
 );
 
-INSERT INTO users
+INSERT INTO users (username,password,salt,email)
 VALUES(
     "user",
-    "$2a$04$hGF9F34HuMBHhM.7iOQoAOfHY3fIK7b0SX1UbHEcM9xzzG9O1QZWa", 
-    "3eb7",
+    "$2b$10$bD0htq6IzetE4JDVJ6xGTuTD8ypVg/gWWAdpOfy0VtSMKQRlBXIPq", 
+    "90bb",
     "user@example.com"
 );
