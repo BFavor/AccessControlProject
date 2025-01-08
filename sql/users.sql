@@ -13,7 +13,7 @@ CREATE TABLE users (
 INSERT INTO users
 VALUES(
     "user",
-    "$2a$04$hGF9F34HuMBHhM.7iOQoAOfHY3fIK7b0SX1UbHEcM9xzzG9O1QZWa", 
+    "$2a$04$/jeENqlGeTEkYbhq2l7NWOKSwahliz5jekotuZiXEnVCtkhn5WOTG", 
     "3eb7",
     "user@example.com"
 );

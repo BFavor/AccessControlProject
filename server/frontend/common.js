@@ -16,8 +16,8 @@ function query() {
 
 function login() {
     let body = JSON.stringify({
-        username: document.getElementById("username").text,
-        password: document.getElementById("password").text
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
     });
     console.log(body)
     fetch("http://" + parsedUrl.host + "/login", {
@@ -30,18 +30,55 @@ function login() {
     })
     .then((resp) => resp.text())
     .then((resp) => {
-        document.href = query.html 
+        console.log("Successful Login");
+        location.href = "http://" + parsedUrl.host + "/totp.html";
     })
     .catch((err) => {
         console.log(err);
-     if (resp.status = 500) {
+        if (resp.status = 500) {
+            console.log("Server Error");
             alert("Server Error");
         }else if (resp.status = 401){
+            console.log("Username or Password is Incorrect");
             alert("Username or Password is incorrect");
         }else {
+            console.log("Unknown Error");
             alert("Unknown Error");
-        //}else {
-        //location.href = "http://" + parsedUrl.host + "/query.html";
         }
+    })
+}
+
+
+function checkTOTP() {
+    let stringifiedBody = JSON.stringify({
+        totp: document.getElementById("totpCode").value
+    });
+    console.log(stringifiedBody)
+    fetch("http://" + parsedUrl.host + "/checkTOTP", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: stringifiedBody
+    })
+    .then((resp) => resp.text())
+    .then((resp) => {
+        if (resp.status = 500) {
+            console.log("Server Error");
+            alert("Server Error");
+        }else if (resp.status = 401){
+            console.log("TOTP Code Incorrect");
+            alert("TOTP Code Incorrect");
+        }else if (resp.status = 415) {
+            console.log("Incomplete Request");
+            alert("Incomplete Request");
+        } else {
+            console.log("TOTP Code Successful");
+            location.href = "http://" + parsedUrl.host + "/query.html";
+        }
+    })
+    .catch((err) => {
+        console.log(err);
     })
 }

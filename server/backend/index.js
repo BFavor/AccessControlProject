@@ -10,6 +10,8 @@ const MYSQLPASS = String(process.env.MYSQLPASS);
 
 const PEPPER = String(process.env.PEPPER);
 
+const {createHmac} = require("crypto");
+
 const app = express();
 app.use(express.json());
 
@@ -40,39 +42,6 @@ app.get("/query", function (request, response) {
 
 
 app.post("/login", function (request, response) {
-  //let parsedBody = JSON.parse(request.body)
-  //if (!(parsedBody.hasOwnProperty('username'))){
-   // console.log("Incomplete Request")
-    //response.status(415).send("Incomplete Request")
- // }
-  //let SQL = "SELECT * FROM users WHERE username=" + parsedBody["username"] + ";"
-  //connection.query(SQL, [true], (error, results, fields) => {
-   // if (error) {
-     // console.error("Database Error:\n",error.message);
-     // response.status(500).send("Server Error");
-    //} 
-    //else {
-      //if (results.length = 0){
-        //console.log("User not found");
-        //response.status(401).send("Unauthorized");
-     // } 
-      //else{
-        //let combinedPass = results[0]["salt"]+parsedBody["password"]+PEPPER;
-        //bcrypt.compare(combinedPass, results[0]["password"], function(err, result){
-          //  if (error){
-            //  console.log("Password Mismatch");
-              //response.status(401).send("Unauthorized");
-            //}
-           // else{
-             // console.log(parsedBody["username"] + " logged in");
-              //response.status(200).send("Success");
-           // }
-        //});
-
-      //}
-
-    //}
-  //});
   let body = JSON.parse(request.body);
   let sql = "SELECT * FROM users WHERE usernmae=" + body["username"] + ";"
   connection.query(SQL, [true], (error, results, fields) => {
@@ -97,6 +66,33 @@ app.post("/login", function (request, response) {
       }
     }
   })
+});
+
+app.post("/checkTOTP", function (request, response) {
+  let parsedBody = JSON.parse(request.body);
+  console.log(parsedBody);
+  if (!parsedBody.hasOwnProperty('totp')) {
+    console.log("Incomplete Request");
+    response.status(415).send("Incomplete Request");
+  }
+  //const {createHmac} = require("crypto");
+
+  const hmac = createHmac('sha256', 'supersecretcode');
+
+  var timestamp = new Date(Date.now());
+  timestamp.setSeconds(30);
+  timestamp.setMilliseconds(0);
+  console.log(timestamp);
+
+  hmac.update(timestamp.toString());
+  let numberPattern = /\d+/g;
+  let result = hmac.digest('hex').match(numberPattern).join('').slice(-6);
+  console.log(result);
+  if(parsedBody["totp"] === result) {
+    response.status(200).send("Code Verification Successful");
+  } else {
+    response.status(401).send("Code Comparison Failed");
+  }
 });
 
 app.listen(PORT, HOST);
