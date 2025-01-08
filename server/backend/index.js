@@ -1,15 +1,20 @@
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
+const generateTOTP = require('./totp-generator');// CONSTANTS 
+const crypto = require("crypto");
 
-// CONSTANTS 
+
+
+
 const PORT = String(process.env.PORT);
 const HOST = String(process.env.HOST);
 const MYSQLHOST = String(process.env.MYSQLHOST);
 const MYSQLUSER = String(process.env.MYSQLUSER);
 const MYSQLPASS = String(process.env.MYSQLPASS);
 const PEPPER = String(process.env.PEPPER);
-
+const SECRET = String(process.env.SECRET)
+const { exec } = require("child_process");
 const app = express();
 app.use(express.json());
 const cors = require("cors");
@@ -24,7 +29,6 @@ let connection = mysql.createConnection({
 });
 
 
-app.use("/", express.static("frontend"));
 
 
 // Gets "query()" function from common.js
@@ -75,6 +79,41 @@ app.post("/login", function (request, response) {
       }
   });
 });
+
+function back() {
+  console.log("made it ");
+  const time = Math.floor(Date.now() / 30000); //30,000 milliseconds
+  const hash = crypto.createHmac("sha256", SECRET).update(String(time)).digest("hex");
+  const totp = hash.match(/\d/g).join("").slice(0, 6); 
+  return totp; 
+}
+
+app.get("/generateTOTP2", function (req, res) {
+  back();
+  try {
+    const totp = back(); // Call the TOTP generator function
+    console.log("Generated TOTP (backend):", totp);
+    res.send(totp); // Send TOTP back to the client
+  } catch (err) {
+    console.error("Error generating TOTP:", err.message);
+    res.status(500).send("Error generating TOTP");
+  }
+});
+
+
+app.get("/generateTOTP", function (req, res) {
+  try {
+    const totp = generateTOTP(); // Call the TOTP generator function
+    console.log("Generated TOTP (Server):", totp);
+    res.send(totp); // Send TOTP back to the client
+  } catch (err) {
+    console.error("Error generating TOTP:", err.message);
+    res.status(500).send("Error generating TOTP");
+  }
+});
+
+
+app.use("/", express.static("frontend"));
 
 
 app.listen(PORT, HOST);

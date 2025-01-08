@@ -16,6 +16,7 @@ services:
       - MYSQLUSER=root
       - MYSQLPASS=example
       - PEPPER=ef79
+      - SECRET = ALGAE 
     volumes:
       - ./server/backend:/app/backend
       - ./server/frontend:/app/frontend
