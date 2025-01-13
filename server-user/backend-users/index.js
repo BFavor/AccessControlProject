@@ -1,16 +1,18 @@
 const express = require("express");
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
+const {createHmac} = require("crypto");
+const jwt = require("jsonwebtoken");
 
 const PORT = String(process.env.PORT);
 const HOST = String(process.env.HOST);
 const MYSQLHOST = String(process.env.MYSQLHOST);
 const MYSQLUSER = String(process.env.MYSQLUSER);
 const MYSQLPASS = String(process.env.MYSQLPASS);
-
 const PEPPER = String(process.env.PEPPER);
+const TOTPSECRET = String(process.env.TOTPSECRET);
+const JWTSECRET = String(process.env.JWTSECRET);
 
-const {createHmac} = require("crypto");
 
 const app = express();
 app.use(express.json());
@@ -22,23 +24,6 @@ let connection = mysql.createConnection({
   password: MYSQLPASS,
   database: "users"
 });
-
-
-app.use("/", express.static("frontend"));
-
-
-app.get("/query", function (request, response) {
-  let SQL = "SELECT * FROM users;"
-  connection.query(SQL, [true], (error, results, fields) => {
-    if (error) {
-      console.error(error.message);
-      response.status(500).send("database error");
-    } else {
-      console.log(results);
-      response.send(results);
-    }
-  });
-})
 
 
 app.post("/login", function (request, response) {
@@ -75,25 +60,37 @@ app.post("/checkTOTP", function (request, response) {
     console.log("Incomplete Request");
     response.status(415).send("Incomplete Request");
   }
-  //const {createHmac} = require("crypto");
 
-  const hmac = createHmac('sha256', 'supersecretcode');
+  const hmac = createHmac('sha256', TOTPSECRET);
 
-  var timestamp = new Date(Date.now());
-  timestamp.setSeconds(30);
-  timestamp.setMilliseconds(0);
+  let ms = 1000 * 30;
+  let timestamp = Math.round(new Date().getTime() / ms) * ms;
   console.log(timestamp);
+
+  //var timestamp = new Date(Date.now());
+  //timestamp.setSeconds(30);
+  //timestamp.setMilliseconds(0);
+  //console.log(timestamp);
 
   hmac.update(timestamp.toString());
   let numberPattern = /\d+/g;
   let result = hmac.digest('hex').match(numberPattern).join('').slice(-6);
   console.log(result);
+
+  // check that totp is the same
   if(parsedBody["totp"] === result) {
-    response.status(200).send("Code Verification Successful");
+    let userData = "SELECT * FROM users WHERE username=" + parsedbody["username"] + ";"
+    let JWT = jwt.sign(userData, JWTSECRET);
+    response.status(200).send(JWT);
   } else {
     response.status(401).send("Code Comparison Failed");
   }
 });
+
+app.post("/verifyJWT", function (request, response) {
+  // verify that the token is current and was made by this server
+
+})
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);

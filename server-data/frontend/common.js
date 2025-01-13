@@ -3,6 +3,9 @@ var parsedUrl = new URL(window.location.href);
 function query() {
     fetch("http://" + parsedUrl.host + "/query", {
         method: "GET",
+        headers: {
+            "Authoriztion": JWT //token from cookie
+        },
         mode: "no-cors",
     })
     .then((resp) => resp.text())
@@ -20,7 +23,7 @@ function login() {
         password: document.getElementById("password").value
     });
     console.log(body)
-    fetch("http://" + parsedUrl.host + "/login", {
+    fetch("http://" + parsedUrl.host + ":8001/login", {
         method: "POST",
         mode: "no-cors",
         headers: {
@@ -54,7 +57,7 @@ function checkTOTP() {
         totp: document.getElementById("totpCode").value
     });
     console.log(stringifiedBody)
-    fetch("http://" + parsedUrl.host + "/checkTOTP", {
+    fetch("http://" + parsedUrl.host + ":8001/checkTOTP", {
         method: "POST",
         mode: "no-cors",
         headers: {
@@ -65,6 +68,7 @@ function checkTOTP() {
     .then((resp) => resp.text())
     .then((resp) => {
         console.log("TOTP Code Successful");
+        // do something with JWT
         location.href = "http://" + parsedUrl.host + "/query.html";
     })
     .catch((err) => {
