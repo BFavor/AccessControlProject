@@ -29,7 +29,6 @@ services:
       - ./sql-data:/docker-entrypoint-initdb.d/
   server-data:
     build: ./server-data
-    restart: always
     environment:
       - HOST=0.0.0.0
       - PORT=80
