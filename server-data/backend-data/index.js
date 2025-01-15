@@ -17,7 +17,7 @@ let connection = mysql.createConnection({
   host: MYSQLHOST,
   user: MYSQLUSER,
   password: MYSQLPASS,
-  database: "users"
+  database: "things"
 });
 
 
