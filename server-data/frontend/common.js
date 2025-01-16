@@ -85,3 +85,8 @@ function checkTOTP() {
         }
     })
 }
+
+function verifyJWT() {
+
+    
+}

@@ -28,7 +28,7 @@ let connection = mysql.createConnection({
 
 app.post("/login", function (request, response) {
   let body = JSON.parse(request.body);
-  let sql = "SELECT * FROM users WHERE usernmae=" + body["username"] + ";"
+  let sql = "SELECT * FROM users WHERE username=" + body["username"] + ";"
   connection.query(SQL, [true], (error, results, fields) => {
     if (error) {
       console.error(error.message);
@@ -39,7 +39,7 @@ app.post("/login", function (request, response) {
         response.status(401).send("Unauthorized");
       } else {
         let combinedPass = results[0]["salt"] + body['password'] + PEPPER;
-        bcryot.compare(combinedPass, results[0]["password"], function(err, results) {
+        bcrypt.compare(combinedPass, results[0]["password"], function(err, results) {
           if (err) {
             console.log(err);
             response.status(401).send("Unauthorized");
@@ -66,11 +66,6 @@ app.post("/checkTOTP", function (request, response) {
   let ms = 1000 * 30;
   let timestamp = Math.round(new Date().getTime() / ms) * ms;
   console.log(timestamp);
-
-  //var timestamp = new Date(Date.now());
-  //timestamp.setSeconds(30);
-  //timestamp.setMilliseconds(0);
-  //console.log(timestamp);
 
   hmac.update(timestamp.toString());
   let numberPattern = /\d+/g;
