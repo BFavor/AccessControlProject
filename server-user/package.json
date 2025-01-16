@@ -1,0 +1,17 @@
+{
+    "name": "backend-users",
+    "version": "0.0.1",
+    "scripts": {
+        "start": "nodemon ./backend-users/index.js"
+    },
+    "devDependencies": {
+        "nodemon": "2.0.20"
+    },
+    "dependencies": {
+        "express": "4.21.2",
+        "mysql2": "3.12.0",
+        "bcrypt": "5.1.1",
+        "crypto": "1.0.1",
+        "jsonwebtoken": "9.0.2"
+    }
+}

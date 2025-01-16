@@ -1,24 +1,46 @@
 version: '3'
 services:
-  mysql:
+  # User Database
+  mysql-users:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=example
     volumes:
-      - ./sql:/docker-entrypoint-initdb.d/
-  server:
-    build: ./server
-    restart: always
+      - ./sql-users:/docker-entrypoint-initdb.d/:ro
+  # User Management API: Contains only a backend API 
+  server-user:
+    build: ./server-user
     environment:
       - HOST=0.0.0.0
-      - PORT=80
-      - MYSQLHOST=mysql
+      - PORT=3000
+      - MYSQLHOST=mysql-users
       - MYSQLUSER=root
       - MYSQLPASS=example
       - PEPPER=ef79
-      - SECRET = ALGAE 
+      - TOTPSECRET=supersecretcode
+      - JWTSECRET=othersupersecretcode
     volumes:
-      - ./server/backend:/app/backend
-      - ./server/frontend:/app/frontend
+      - ./server-user/backend-users:/app/backend-users
+    ports:
+      - "3000:3000"
+  # Other Database 
+  mysql-data:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
+    volumes:
+      - ./sql-data:/docker-entrypoint-initdb.d/:ro
+  # Data API: Contains a backed and frontend 
+  server-data:
+    build: ./server-data
+    environment:
+      - HOST=0.0.0.0
+      - PORT=80
+      - MYSQLHOST=mysql-data
+      - MYSQLUSER=root
+      - MYSQLPASS=example
+    volumes:
+      - ./server-data/backend-data:/app/backend-data
+      - ./server-data/frontend:/app/frontend
     ports:
       - "80:80"
