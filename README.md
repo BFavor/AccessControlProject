@@ -13,7 +13,7 @@
 - `sudo docker compose down --volumes --remove-orphans` To close the servers and sql databases and reclaim allocated resources 
 
 
-## Quick Guide: What the Hell is Docker
+## Quick Guide: What the <i>hell</i> is Dr. John Spurgeon talking about
 1. Docker creates a virtual environment to build, test, and deploy applications. These virtual environments are called containers, and they can download whatever software they need in order to run. Think of it as a virtual machine on your virtual machine used strictly for creating and deploying applications. 
 2. Docker projects have a `docker-compose.yml` file to list the services that'll run in a docker container and all of their qualities, including very important <u>environemental variables</u>. As of 01/16 our container currently is capable of running 2 Servers (`server-data` and `server-user`) and 2 SQL Databases (`sql-data` and `sql-users`). The servers each have `pacakge.json` files to specify what libraries/packages/dependencies they need, as well as `dockerfile` files that pretty much have docker instructions for how to run each service.
 3. The server-data/frontend folder contains all of the files we'll need for a front end web page. But the most important file is `common.js`, where all of our functions will be declared and initialized, and call upon API Routes.
