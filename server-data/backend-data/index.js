@@ -36,7 +36,7 @@ app.get("/query", function (request, response) {
   })
   .then((resp) => {
       if (resp.status === 200) {
-          let SQL = "SELECT * FROM things;";
+          let SQL = "SELECT * FROM things1;";
           connection.query(SQL, (error, results) => {
               if (error) {
                   console.error(error.message);
