@@ -21,41 +21,63 @@ let connection = mysql.createConnection({
 
 // Don't remove this line 
 app.use("/", express.static("frontend"));
+// DO NOT REMOVE THIS LINE 
+
+//=========================================================================================================
+
 
 // Query the "things" database 
 app.get("/query", function (request, response) {
   const token = request.headers["authorization"];
   if (!token) {
-    response.status(401).send("Token missing");
+    return response.status(401).send("Token missing");
   }
 
   // Call the validateToken API Route in the other server
   fetch(`http://server-user:3000/validateToken`, {
-      method: "POST",
-      headers: { "Authorization": token }
+    method: "POST",
+    headers: { "Authorization": token }
   })
   .then((resp) => {
-      if (resp.status === 200) {
-          let SQL = "SELECT * FROM things1;";
-          connection.query(SQL, (error, results) => {
-              if (error) {
-                  console.error(error.message);
-                  response.status(500).send("Database error");
-              } else {
-                // display that shit
-                response.send(results);
-              }
-          });
+    if (resp.status === 200) {
+      // Parse the response JSON to access the payload
+      return resp.json();
+    } else {
+      // Handle invalid token
+      throw new Error("Token invalid");
+    }
+  })
+  .then((data) => {
+    // Extract payload data
+    const { username, role } = data.payload; // Assuming the payload includes "username" and "role"
+    console.log(`Token valid for user: ${username} with role: ${role}`);
+
+    // Check if the user is an Admin
+    if (role !== "Admin") {
+      console.log(`Access denied for user: ${username} (Role: ${role})`);
+      return response.status(403).send("Access forbidden: Insufficient privileges, Lame-o");
+    }
+
+    // Query the "things" database
+    const SQL = "SELECT * FROM things1;";
+    connection.query(SQL, (error, results) => {
+      if (error) {
+        console.error(error.message);
+        response.status(500).send("Database error");
       } else {
-          response.status(401).send("Token invalid");
+        // Send query results
+        response.send(results);
       }
+    });
   })
   .catch((err) => {
-      console.error("Error validating token:", err);
-      response.status(500).send("Token validation failed");
+    console.error("Error validating token or querying database:", err.message);
+    response.status(401).send(err.message);
   });
-});
+}); // End of app.get("/query")
 
+
+//=========================================================================================================
 
 // Don't remove this 
 app.listen(PORT, HOST);
