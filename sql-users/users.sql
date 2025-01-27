@@ -17,5 +17,5 @@ VALUES(
     "$2a$04$/jeENqlGeTEkYbhq2l7NWOKSwahliz5jekotuZiXEnVCtkhn5WOTG", 
     "3eb7",
     "user@example.com",
-    "Lame-o"
+    "Mid"
 );

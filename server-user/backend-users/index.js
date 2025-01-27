@@ -101,6 +101,7 @@ app.post("/checkTOTP", function (request, response) {
       const payload = {
         username: user.username,
         email: user.email,
+        role: user.role,
       };
 
       // Create a JWT token that expires in 1 hour
