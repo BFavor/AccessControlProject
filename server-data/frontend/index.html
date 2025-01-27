@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-
-<html>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
-	<link type="text/css" rel="stylesheet" href="common.css">
-	<script type="text/javascript" src="common.js"></script>
-    <head>
-        <title>
-            Access Control Project
-        </title>
-    </head>
-
-    <body>
-        <div class="content">
-            <textarea id="username" rows="1" cols="45" placeholder="username"></textarea>
-            <textarea id="password" rows="1" cols="45" placeholder="password"></textarea>
-            <p></p>
-            <button class="button" onclick="login()">Login</button>
-		</div>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Add the Boxicons and google fonts libraries-->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+</head>
+<body>
+    <!-- Login Form -->
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="login-page">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script src="common.js"></script>
+</body>
 </html>

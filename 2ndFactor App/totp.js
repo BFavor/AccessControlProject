@@ -4,8 +4,8 @@ const hmac = createHmac('sha256', 'supersecretcode');
 
 let ms = 1000 * 30;
 let timestamp = Math.round(new Date().getTime() / ms) * ms;
-console.log(timestamp);
-
+// console.log(timestamp);
+// 
 //var timestamp = new Date(Date.now());
 //timestamp.setSeconds(30);
 //timestamp.setMilliseconds(0);

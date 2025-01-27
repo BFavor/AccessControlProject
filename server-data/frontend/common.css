@@ -1,24 +1,172 @@
+/* Dark Mode Variables */
+:root {
+    --background-color: #2e2e2e; 
+    --text-color: #e0e0e0; 
+    --textarea-background: #3a3a3a; 
+    --textarea-border: #5b5b5b; 
+    --button-background: #4a6fa5; 
+    --button-hover: #5b7fb6; 
+    --icon-color: #c0c0c0; 
+    --semi-transparent-background: rgba(46, 46, 46, 0.85); 
+    --semi-transparent-shadow: rgba(0, 0, 0, 0.25); 
+}
+
+/* Light Mode Variables */
+:root.light-mode {
+    --background-color: #f7f7f7; 
+    --text-color: #2e2e2e; 
+    --textarea-background: #eaeaea; 
+    --textarea-border: #cccccc; 
+    --button-background: #9bbcdf; 
+    --button-hover: #89abcf; 
+    --icon-color: #333; 
+    --semi-transparent-background: rgba(255, 255, 255, 0.8); 
+    --semi-transparent-shadow: rgba(0, 0, 0, 0.1); 
+}
+
+/*Applied to each page*/
 body {
-    background-color: lightblue;
+    margin: 0;
+    font-family: "Ubuntu", sans-serif;
+    background: url('./type-cell-GIF.gif') no-repeat center center fixed;
+    background-size: contain;
+    background-color: var(--background-color); 
+    color: var(--text-color); 
+    transition: background-color 0.4s, color 0.4s;
 }
-.content{
-    position:absolute;
-    top:50%;
-    left:50%;
-    width :200px;
-    height:200px;
-    margin-left:-100px;
-    margin-top:-100px;
+
+/* Placeholder text*/
+::placeholder {
+    color: var(--text-color);
+    opacity: 0.8; /* Slightly less opaque for a softer appearance */
 }
-.button {
-    background-color: black;
-    border: none;
-    color: whitesmoke;
-    padding: 10px 30px;
+
+/* Textareas */
+textarea {
+    width: 100%;
+    max-width: 90%;
+    margin: 1rem auto;
+    padding: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-color);
+    background: var(--textarea-background); 
+    border: 1px solid var(--textarea-border); 
+    resize: none; 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.4s, border-color 0.4s;
+}
+
+/* Sidebar*/
+.sidebar {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    width: 75px;
+    height: 100%;
+    background: #3949ab;
+    transition: all 0.4s;
+    z-index: 10;
+}
+
+body.open .sidebar {
+    width: 240px;
+}
+
+body.logged-in .sidebar {
+    display: block;
+}
+
+/* Sidebar Burger Icon */
+.sidebar-burger > i { /*the >i allows the child elements to be modified*/
+    color: var(--icon-color); 
+    transition: color 0.4s;
+}
+
+.sidebar-burger:hover > i {
+    color: #bdbdbd; 
+}
+
+/* Sidebar Menu Buttons */
+.sidebar-menu button {
+    background: var(--button-background); 
+    color: var(--text-color); 
+    transition: background 0.4s, color 0.4s; /*transition*/
+}
+
+.sidebar-menu button:hover {
+    background: var(--button-hover);
+}
+
+/* First Button (the toggle theme one)*/
+.sidebar-menu button:first-of-type > i {
+    color: var(--text-color); 
+    transition: color 0.4s;
+}
+
+.sidebar-menu button:first-of-type {
+    background: var(--button-background); 
+}
+
+.sidebar-menu button:first-of-type:hover {
+    background: var(--button-hover); 
+}
+
+/* Login Container Styles */
+.login-container {
+    position: relative;
+    z-index: 10;
+    width: 300px;
+    margin: 100px auto;
     text-align: center;
-    text-decoration: none;
-    font-size: 40px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    margin-left: 40%;
+    background: var(--semi-transparent-background); 
+    padding: 2rem;
+    border-radius: 12px; 
+    box-shadow: 0 8px 16px var(--semi-transparent-shadow); 
+    color: var(--text-color); 
+}
+
+.login-container h1 {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.login-container input {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border: 1px solid var(--textarea-border);
+    border-radius: 5px;
+    color: var(--text-color);
+    background: var(--textarea-background);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 0.5rem;
+    background: var(--button-background);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background 0.4s, color 0.4s;
+}
+
+.login-container button:hover {
+    background: var(--button-hover);
+}
+
+/* Center Content (for query.html and others) */
+.content {
+    position: relative;
+    z-index: 10;
+    background: var(--semi-transparent-background); 
+    padding: 2rem;
+    margin: 2rem auto;
+    border-radius: 12px; 
+    max-width: 800px;
+    color: var(--text-color);
+    text-align: center;
+    box-shadow: 0 8px 16px var(--semi-transparent-shadow); 
 }

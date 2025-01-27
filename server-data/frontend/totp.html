@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-
-<html>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.png">
-	<link type="text/css" rel="stylesheet" href="common.css">
-	<script type="text/javascript" src="common.js"></script>
-    <head>
-        <title>
-            Access Control Project
-        </title>
-    </head>
-
-    <body>
-        <div class="content">
-            <textarea id="totpCode" rows="1" cols="45" placeholder="Please enter 6 digit code"></textarea>
-            <p></p>
-            <button class="button" onclick="checkTOTP()">Submit</button>
-		</div>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOTP Verification</title>
+    <!-- Add the google fonts library-->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <script src="common.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h1>TOTP Verification</h1>
+        <textarea id="totpCode" rows="1" placeholder="Enter 6-digit code"></textarea>
+        <p></p>
+        <button id="totp-button" class="submit-button">Generate TOTP</button>
+    </div>
+</body>
 </html>

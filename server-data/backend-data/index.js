@@ -6,6 +6,8 @@ const HOST = String(process.env.HOST);
 const MYSQLHOST = String(process.env.MYSQLHOST);
 const MYSQLUSER = String(process.env.MYSQLUSER);
 const MYSQLPASS = String(process.env.MYSQLPASS);
+const jwt = require("jsonwebtoken");
+const JWTSECRET = String(process.env.JWTSECRET);
 
 // use express to make this web application
 const app = express();
@@ -129,6 +131,116 @@ app.get("/query2", function (request, response) {
   });
 }); // End of app.get("/query2")
 
+
+// API route to update theme preference
+// Validate and update user details in the things2 table
+app.post("/validate-and-update-user", async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+      return res.status(400).json({ message: "Missing token" });
+  }
+
+  try {
+      console.log("Validating and updating user with token:", token);
+
+      // Call the verify-user-details API
+      const response = await fetch("http://server-user:3000/verify-user-details", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+      });
+
+      if (response.status !== 200) {
+          const error = await response.json();
+          console.error("Error verifying user details:", error.message);
+          return res.status(response.status).json(error);
+      }
+
+      const data = await response.json();
+      const { username } = data.payload;
+
+      console.log("Verified username:", username);
+
+      // Insert or update the username and theme preference in the things2 table
+      const defaultTheme = "dark"; // Replace with logic for current theme
+      connection.query(
+          "INSERT INTO things2 (username, theme_preference) VALUES (?, ?) ON DUPLICATE KEY UPDATE theme_preference = VALUES(theme_preference)",
+          [username, defaultTheme],
+          (error, results) => {
+              if (error) {
+                  console.error("Database error:", error.message);
+                  return res.status(500).json({ message: "Database error" });
+              }
+
+              res.status(200).json({
+                  payload: {
+                      username,
+                      role: data.payload.role,
+                  },
+              });
+          }
+      );
+  } catch (err) {
+      console.error("Error validating and updating user:", err.message);
+      res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
+
+app.post('/change-theme', async (req, res) => {
+  const { token, theme } = req.body;
+
+  console.log("Received token:", token); // Debugging
+  console.log("Received theme:", theme); // Debugging
+
+  if (!token || !theme) {
+      console.error("Missing token or theme preference");
+      return res.status(400).json({ message: "Missing token or theme preference" });
+  }
+
+  const validThemes = ['dark', 'light'];
+  
+  if (!validThemes.includes(theme)) {
+      console.error("Invalid theme preference:", theme);
+      return res.status(400).json({ message: "Invalid theme preference" });
+  }
+
+  try {
+      // Decode and verify the JWT
+      const decoded = jwt.verify(token, process.env.JWTSECRET);
+      console.log("Decoded JWT:", decoded); // Debugging
+
+      const { username } = decoded;
+      if (!username) {
+          console.error("Invalid token: Missing username");
+          return res.status(400).json({ message: "Invalid token: Missing username" });
+      }
+
+      // Insert or update the theme preference in the `things2` table
+      const SQL = `
+          INSERT INTO things2 (username, theme_preference)
+          VALUES (?, ?)
+          ON DUPLICATE KEY UPDATE theme_preference = VALUES(theme_preference)
+      `;
+
+      connection.query(SQL, [username, theme], (error, results) => {
+          if (error) {
+              console.error("Database error:", error.message);
+              return res.status(500).json({ message: "Database error" });
+          }
+
+          console.log("Database update successful:", results);
+          res.status(200).json({ message: "Theme preference updated successfully" });
+      });
+  } catch (err) {
+      console.error("Error updating theme preference:", err.message);
+      res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 //=========================================================================================================
 

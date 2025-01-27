@@ -13,11 +13,6 @@ VALUES(
 );
 
 CREATE TABLE things2 (
-    member VARCHAR(255) NOT NULL,
-    PRIMARY KEY (member)
-);
-
-INSERT INTO things2
-VALUES(
-    "one"
+    username VARCHAR(255) NOT NULL PRIMARY KEY,
+    theme_preference VARCHAR(10) DEFAULT 'dark'
 );
