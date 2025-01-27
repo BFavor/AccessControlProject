@@ -8,6 +8,7 @@ const MYSQLUSER = String(process.env.MYSQLUSER);
 const MYSQLPASS = String(process.env.MYSQLPASS);
 
 // Assignment 1: Login
+const cors = require("cors");
 const PEPPER = String(process.env.PEPPER);
 
 // Assignment 2: TOTP
@@ -20,10 +21,12 @@ const jwt = require("jsonwebtoken");
 const JWTSECRET = String(process.env.JWTSECRET);
 
 
-// Don't delete this 
+// DO NOT REMOVE THIS LINE
 const app = express();
 app.use(express.json());
-
+app.use(cors());
+// DO NOT REMOVE THIS LINE
+// DO NOT REMOVE THIS LINE
 // Create a connection with a particular database: "users" database in this case
 let connection = mysql.createConnection({
   host: MYSQLHOST,
@@ -31,82 +34,119 @@ let connection = mysql.createConnection({
   password: MYSQLPASS,
   database: "users"
 });
+// DO NOT REMOVE THIS LINE
 
+
+//=========================================================================================================
 
 // Assignment 1: Login 
 app.post("/login", function (request, response) {
   let body = request.body;
-
-  if (!body.hasOwnProperty("username")){
-    console.log("Incomplete Request");
-    response.status(415).send("Incomplete Request");
-  }
-
-  let SQL = "SELECT * FROM users WHERE username=" + body["username"] + ";"
-  connection.query(SQL, [true], (error, results, fields) => {
-    if (error){
-      console.error("DATABASE ERROR");
-      response.status(500).send("Server Error");
-    }
-    else {
-      if (results.length = 0) {
+  let SQL = "SELECT * FROM users WHERE username=?";
+  connection.query(SQL, body["username"], (error, results, fields) => {
+    if (error) {
+      console.error(error.message);
+      response.status(500).send("Database Error");
+    } else {
+      if (results.length === 0) {
         console.log("Username not found");
-        response.status(401).send("Unauthorized");
+        return response.status(401).send("Unauthorized");
       } else {
         let combinedPass = results[0]["salt"] + body["password"] + PEPPER;
-        bcrypt.compare(combinedPass, results[0]["password"], function(err, results) {
+        bcrypt.compare(combinedPass, results[0]["password"], function(err, result) {
           if (err) {
             console.log(err);
             response.status(401).send("Unauthorized");
           } else {
-            console.log(results);
-            response.status(200).send("Success");
+            return response.status(200).send("Success");
           }
         });
       }
     }
   })
-}); // END OF login() FUNCTION 
+}); // END OF login API ROUTE
 
 // Assignment 2: TOTP
 app.post("/checkTOTP", function (request, response) {
-  let parsedBody = JSON.parse(request.body);
-  console.log(parsedBody);
-  if (!parsedBody.hasOwnProperty('totp')) {
+  // Retrieve the manually generated 6-digit code from the textarea in totp.html
+  const parsedBody = request.body;
+
+  if (!parsedBody.hasOwnProperty("totp") || !parsedBody.hasOwnProperty("username")) {
     console.log("Incomplete Request");
-    response.status(415).send("Incomplete Request");
+    return response.status(415).send("Incomplete Request");
   }
 
-  const hmac = createHmac('sha256', TOTPSECRET);
-
-  let ms = 1000 * 30;
-  let timestamp = Math.round(new Date().getTime() / ms) * ms;
-  console.log(timestamp);
-
+  // Generate the TOTP from the button 
+  const hmac = createHmac("sha256", TOTPSECRET);
+  const ms = 1000 * 30;
+  const timestamp = Math.round(new Date().getTime() / ms) * ms;
   hmac.update(timestamp.toString());
-  let numberPattern = /\d+/g;
-  let result = hmac.digest('hex').match(numberPattern).join('').slice(-6);
-  console.log(result);
 
-  // check that totp is the same
-  if(parsedBody["totp"] === result) {
-    let userData = "SELECT * FROM users WHERE username=" + parsedBody["username"] + ";"
-    // Create a JWT Token using the username and the JWTSECRET env variable
-    // now you can just return the JWT as a string token to the frontend and the frontend will do something with it 
-    let JWT = jwt.sign(userData, JWTSECRET);
-    response.status(200).send(JWT);
+  const numberPattern = /\d+/g;
+  const result = hmac.digest("hex").match(numberPattern).join("").slice(-6);
+  console.log("Generated TOTP:", result);
+
+  // Check if manual TOTP and button TOTP match
+  if (parsedBody["totp"] === result) {
+    // Query the database to find the user
+    const SQL = "SELECT * FROM users WHERE username = ?";
+    connection.query(SQL, [parsedBody["username"]], (error, results) => {
+      if (error || results.length === 0) {
+        console.log("User not found or database error");
+        return response.status(401).send("Unauthorized");
+      }
+
+      // JWT token data
+      const user = results[0];
+      const payload = {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      };
+
+      // Create a JWT token that expires in 1 hour
+      const token = jwt.sign(payload, JWTSECRET, { expiresIn: "1h" });
+      console.log("Generated JWT:", token);
+
+      response.status(200).send(token);
+    });
   } else {
+    console.log("TOTP mismatch", result,parsedBody["totp"]);
     response.status(401).send("Code Comparison Failed");
   }
-}); // END OF checkTOTP() FUNCTION 
+}); // END OF checkTOTP API ROUTE
+
 
 // Assignment 3: JWT
-app.post("/verifyJWT", function (request, response) {
-  // verify that the token is current and was made by this server
-  // JWT.verify() documentation 
+app.post("/validateToken", function (request, response) {
+  // Take the JWT token generated by checkTOTP, which has info from the users table
+  const token = request.headers["authorization"];
 
-}); // END OF verifyJWT() FUNCTION
+  console.log("Here is the token!", token);
+  if (!token) {
+    return response.status(401).send("Token missing");
+  }
 
-// Don't remove this 
+  try {
+    // Verify the token is good
+    const payload = jwt.verify(token, JWTSECRET);
+    // console.log(JSON.stringify(payload));
+    // console.log(JSON.stringify(payload, ["username", "role"], 2));
+    // Send the payload with status code 200
+    response.status(200).json({
+      message: "Token valid",
+      payload: payload
+    });
+  } catch (err) {
+    console.log("Token invalid or expired", err.message);
+    response.status(401).send("Token invalid");
+  }
+}); // END OF validateToken API ROUTE
+
+
+//=========================================================================================================
+
+// DO NOT REMOVE THIS LINE
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
+// DO NOT REMOVE THIS LINE

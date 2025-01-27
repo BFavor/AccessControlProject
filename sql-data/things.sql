@@ -2,18 +2,22 @@ CREATE DATABASE things;
 
 use things;
 
-CREATE TABLE things (
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    salt     VARCHAR(255) NOT NULL,
-    email    VARCHAR(255) NOT NULL,
-    PRIMARY KEY (username)
+CREATE TABLE things1 (
+    algae VARCHAR(255) NOT NULL,
+    PRIMARY KEY (algae)
 );
 
-INSERT INTO things
+INSERT INTO things1
 VALUES(
-    "user",
-    "$2a$04$/jeENqlGeTEkYbhq2l7NWOKSwahliz5jekotuZiXEnVCtkhn5WOTG", 
-    "3eb7",
-    "user@example.com"
+    "isKing"
+);
+
+CREATE TABLE things2 (
+    member VARCHAR(255) NOT NULL,
+    PRIMARY KEY (member)
+);
+
+INSERT INTO things2
+VALUES(
+    "one"
 );
