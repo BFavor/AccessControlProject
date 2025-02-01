@@ -54,10 +54,10 @@ app.get("/query", function (request, response) {
     const { username, role } = data.payload; // Assuming the payload includes "username" and "role"
     console.log(`Token valid for user: ${username} with role: ${role}`);
 
-    // Check if the user is an Admin
-    if (role !== "Admin") {
+    // Check if the user is an Lame-o
+    if (role !== "Lame-o") {
       console.log(`Access denied for user: ${username} (Role: ${role})`);
-      return response.status(403).send("Access forbidden: Insufficient privileges, Lame-o or Mid");
+      return response.status(403).send("Access forbidden: Insufficient privileges, Admin or Mid");
     }
 
     // Query the "things" database
@@ -107,10 +107,10 @@ app.get("/query2", function (request, response) {
     const { username, role } = data.payload; // Assuming the payload includes "username" and "role"
     console.log(`Token valid for user: ${username} with role: ${role}`);
 
-    // Check if the user is an Lame-o
-    if (role !== "Lame-o") {
+    // Check if the user is an Mid
+    if (role !== "Mid") {
       console.log(`Access denied for user: ${username} (Role: ${role})`);
-      return response.status(403).send("Access forbidden: Insufficient privileges, Admin or Mid");
+      return response.status(403).send("Access forbidden: Insufficient privileges, Admin or Lame-o");
     }
 
     // Query the "things" database
