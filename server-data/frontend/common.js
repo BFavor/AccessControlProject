@@ -84,26 +84,10 @@ function login() {
 
     // Send a POST request to server-user/backend-users/index.js to authenticate the user
     fetch("http://localhost:3000/login", {
-    // Retrieve the username and password from the textareas in index.html
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    // Debugging
-    if (!username || !password) {
-        alert("Please fill in both the username and password fields.");
-        return;
-    }
-
-    // Create a JSON object with the username and password
-    let body = JSON.stringify({ username, password });
-
-    // Send a POST request to server-user/backend-users/index.js to authenticate the user
-    fetch("http://localhost:3000/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: body,
         body: body,
     })
     .then((resp) => {
