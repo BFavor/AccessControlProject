@@ -6,12 +6,13 @@ const HOST = String(process.env.HOST);
 const MYSQLHOST = String(process.env.MYSQLHOST);
 const MYSQLUSER = String(process.env.MYSQLUSER);
 const MYSQLPASS = String(process.env.MYSQLPASS);
+const jwt = require("jsonwebtoken");
 
 // use express to make this web application
 const app = express();
 app.use(express.json());
 
-// connext to "things.sql" 
+// connect to "things.sql" 
 let connection = mysql.createConnection({
   host: MYSQLHOST,
   user: MYSQLUSER,
@@ -19,14 +20,14 @@ let connection = mysql.createConnection({
   database: "things"
 });
 
-// Don't remove this line 
+// DO NOT REMOVE THIS LINE 
 app.use("/", express.static("frontend"));
 // DO NOT REMOVE THIS LINE 
 
 //=========================================================================================================
-
-
-// Query the "things" database 
+// query.html
+//=========================================================================================================
+// Query the things1 table
 app.get("/query", function (request, response) {
   const token = request.headers["authorization"];
   if (!token) {
@@ -55,10 +56,10 @@ app.get("/query", function (request, response) {
     // Check if the user is an Admin
     if (role !== "Admin") {
       console.log(`Access denied for user: ${username} (Role: ${role})`);
-      return response.status(403).send("Access forbidden: Insufficient privileges, Lame-o or Mid");
+      return response.status(403).send("Access forbidden: Insufficient privileges");
     }
 
-    // Query the "things" database
+    // Query the "things" database for things1 table
     const SQL = "SELECT * FROM things1;";
     connection.query(SQL, (error, results) => {
       if (error) {
@@ -74,12 +75,9 @@ app.get("/query", function (request, response) {
     console.error("Error validating token or querying database:", err.message);
     response.status(401).send(err.message);
   });
-}); // End of app.get("/query")
+}); // END OF query API ROUTE
 
-
-
-
-// Query the "things" database 
+// Query the things2 table
 app.get("/query2", function (request, response) {
   const token = request.headers["authorization"];
   if (!token) {
@@ -105,13 +103,13 @@ app.get("/query2", function (request, response) {
     const { username, role } = data.payload; // Assuming the payload includes "username" and "role"
     console.log(`Token valid for user: ${username} with role: ${role}`);
 
-    // Check if the user is an Lame-o
-    if (role !== "Lame-o") {
+    // Check if the user is an Default User
+    if (role !== "Default") {
       console.log(`Access denied for user: ${username} (Role: ${role})`);
-      return response.status(403).send("Access forbidden: Insufficient privileges, Admin or Mid");
+      return response.status(403).send("Access forbidden: Insufficient privileges, only Default users can access this route");
     }
 
-    // Query the "things" database
+    // Query the "things" database for things2 table
     const SQL = "SELECT * FROM things2;";
     connection.query(SQL, (error, results) => {
       if (error) {
@@ -127,8 +125,117 @@ app.get("/query2", function (request, response) {
     console.error("Error validating token or querying database:", err.message);
     response.status(401).send(err.message);
   });
-}); // End of app.get("/query2")
+}); // END OF query2 API ROUTE
 
+// Validate and update user details in the things2 table
+app.post("/validate-and-update-user", async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: "Missing token" });
+  }
+
+  try {
+      console.log("Validating and updating user with token:", token);
+
+      // Call the verify-user-details API ROUTE in the other server
+      const response = await fetch("http://server-user:3000/verify-user-details", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (response.status !== 200) {
+        const error = await response.json();
+        console.error("Error verifying user details:", error.message);
+        return res.status(response.status).json(error);
+      }
+
+      // Store data from the response in JSON format
+      const data = await response.json();
+      // Extract the username from the payload
+      const { username } = data.payload;
+      console.log("Verified username:", username);
+
+      // SQL Shennanigans 
+      // things2 table: Update OR Insert the username and default theme preference
+      const defaultTheme = "dark"; 
+      connection.query(
+        "INSERT INTO things2 (username, theme_preference) VALUES (?, ?) ON DUPLICATE KEY UPDATE theme_preference = VALUES(theme_preference)",
+        [username, defaultTheme],
+        (error, results) => {
+
+          // Error retrieving data from the database
+          if (error) {
+            console.error("Database error:", error.message);
+            return res.status(500).json({ message: "Database error" });
+          }
+
+
+          // Success: return status code 200 and the username and role in JSON format
+          res.status(200).json({
+            payload: {
+              username,
+              role: data.payload.role,
+            },
+          });
+        }
+      );
+  } catch (err) {
+      console.error("Error validating and updating user:", err.message);
+      res.status(500).json({ message: "Internal Server Error" });
+  }
+}); // END OF validate-and-update-user API ROUTE
+
+// API route to update theme preference
+app.post('/change-theme', async (req, res) => {
+  const { token, theme } = req.body;
+
+  console.log("Received token:", token); // Debugging
+  console.log("Received theme:", theme); // Debugging
+
+  if (!token || !theme) {
+    console.error("Missing token or theme preference");
+    return res.status(400).json({ message: "Missing token or theme preference" });
+  }
+
+  const validThemes = ['dark', 'light'];
+  
+  if (!validThemes.includes(theme)) {
+    console.error("Invalid theme preference:", theme);
+    return res.status(400).json({ message: "Invalid theme preference" });
+  }
+
+  try {
+      // Decode and verify the JWT
+      const decoded = jwt.verify(token, process.env.JWTSECRET);
+      console.log("Decoded JWT:", decoded); // Debugging
+
+      const { username } = decoded;
+      if (!username) {
+        console.error("Invalid token: Missing username");
+        return res.status(400).json({ message: "Invalid token: Missing username" });
+      }
+
+      // Insert or update the theme preference in the `things2` table
+      const SQL = "INSERT INTO things2 (username, theme_preference) VALUES (?, ?) ON DUPLICATE KEY UPDATE theme_preference = VALUES(theme_preference)";
+
+      connection.query(SQL, [username, theme], (error, results) => {
+        if (error) {
+          console.error("Database error:", error.message);
+          return res.status(500).json({ message: "Database error" });
+        }
+
+        console.log("Database update successful:", results);
+        res.status(200).json({ message: "Theme preference updated successfully" });
+      });
+  } catch (err) {
+    console.error("Error updating theme preference:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}); // END OF change-theme API ROUTE
 
 //=========================================================================================================
 

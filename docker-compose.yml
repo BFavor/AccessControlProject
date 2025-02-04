@@ -39,6 +39,7 @@ services:
       - MYSQLHOST=mysql-data
       - MYSQLUSER=root
       - MYSQLPASS=example
+      - JWTSECRET=othersupersecretcode  
     volumes:
       - ./server-data/backend-data:/app/backend-data
       - ./server-data/frontend:/app/frontend
