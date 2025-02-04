@@ -38,12 +38,14 @@ function signUp() {
         alert("Passwords do not match!");
         return;
     }
+    console.log("JWT:",JWT);
 
     console.log("Sending signup request with:", { username, email, password });
 
     fetch("http://localhost:3000/signup", {
         method: "POST",
         headers: {
+            "Content-Type": "application/json",
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, email, password }),
@@ -82,15 +84,34 @@ function login() {
 
     // Send a POST request to server-user/backend-users/index.js to authenticate the user
     fetch("http://localhost:3000/login", {
+    // Retrieve the username and password from the textareas in index.html
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // Debugging
+    if (!username || !password) {
+        alert("Please fill in both the username and password fields.");
+        return;
+    }
+
+    // Create a JSON object with the username and password
+    let body = JSON.stringify({ username, password });
+
+    // Send a POST request to server-user/backend-users/index.js to authenticate the user
+    fetch("http://localhost:3000/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: body,
+        body: body,
     })
     .then((resp) => {
         if (resp.status === 200) {
             return resp.text().then(() => {
+                document.cookie = "username=" + username;
+                document.body.classList.add("logged-in"); 
+                console.log("Logged in:", username);
                 document.cookie = "username=" + username;
                 document.body.classList.add("logged-in"); 
                 console.log("Logged in:", username);
@@ -103,6 +124,7 @@ function login() {
         }
     })
     .catch((err) => {
+        console.log("Error during login:", err);
         console.log("Error during login:", err);
     });
 } //  END OF login() function
@@ -144,6 +166,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Function to generate a TOTP 
 function checkTOTP() {
+
+
     const username = document.cookie
         .split("; ")
         .find((row) => row.startsWith("username="))?.split("=")[1];
@@ -159,8 +183,10 @@ function checkTOTP() {
     let stringifiedBody = JSON.stringify({
         totp: document.getElementById("totpCode").value,
         username: username,
+        username: username,
     });
 
+    // Send a POST request to server-user/backend-users/index.js to verify the TOTP
     // Send a POST request to server-user/backend-users/index.js to verify the TOTP
     fetch("http://" + parsedUrl.host + ":3000/checkTOTP", {
         method: "POST",
@@ -168,10 +194,13 @@ function checkTOTP() {
             "Content-Type": "application/json",
         },
         body: stringifiedBody,
+        body: stringifiedBody,
     })
     .then((resp) => {
         if (resp.status === 200) {
             return resp.text().then((token) => {
+                document.cookie = `JWT=${token}`; 
+                console.log("JWT Cookie set:", document.cookie); 
                 document.cookie = `JWT=${token}`; 
                 console.log("JWT Cookie set:", document.cookie); 
                 location.href = "http://" + parsedUrl.host + "/query.html";

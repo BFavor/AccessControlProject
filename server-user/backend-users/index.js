@@ -197,9 +197,14 @@ app.post("/checkTOTP", function (request, response) {
 // Validate the JWT token
 app.post("/validateToken", (req, res) => {
   const token = req.headers["authorization"];
+// Validate the JWT token
+app.post("/validateToken", (req, res) => {
+  const token = req.headers["authorization"];
 
   console.log("Here is the token:", token);
+  console.log("Here is the token:", token);
   if (!token) {
+      return res.status(401).send("Token missing");
       return res.status(401).send("Token missing");
   }
 
