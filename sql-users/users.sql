@@ -7,7 +7,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     salt     VARCHAR(255) NOT NULL,
     email    VARCHAR(255) NOT NULL,
-    role ENUM('Default','Admin') NOT NULL,
+    role ENUM('Lame-o','Mid','Admin') NOT NULL,
     PRIMARY KEY (username)
 );
 
@@ -36,4 +36,13 @@ VALUES(
     "c3af",
     "admin@random.com",
     "Admin"
+);
+
+CREATE TABLE logs (
+    id BINARY(16) DEFAULT (UUID_TO_BIN(UUID(), 1)) PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_accessed VARCHAR(255) NOT NULL,
+    status ENUM('Success', 'Failure') NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );

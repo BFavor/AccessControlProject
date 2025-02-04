@@ -24,8 +24,11 @@ const JWTSECRET = String(process.env.JWTSECRET);
 // DO NOT REMOVE THESE LINES
 const app = express();
 app.use(express.json());
-app.use(cors());
-
+app.use(cors({
+  origin: "*", // Allow requests from any origin (use specific origins for security)
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 // Create a connection with a particular database: "users" database in this case
 let connection = mysql.createConnection({
   host: MYSQLHOST,
@@ -197,15 +200,9 @@ app.post("/checkTOTP", function (request, response) {
 // Validate the JWT token
 app.post("/validateToken", (req, res) => {
   const token = req.headers["authorization"];
-});
-// Validate the JWT token
-app.post("/validateToken", (req, res) => {
-  const token = req.headers["authorization"];
 
-  console.log("Here is the token:", token);
-  console.log("Here is the token:", token);
+  // console.log("Here is the token:", token);
   if (!token) {
-      return res.status(401).send("Token missing");
       return res.status(401).send("Token missing");
   }
 
@@ -226,7 +223,7 @@ app.post("/validateToken", (req, res) => {
 
 // Assignment 4: Roles and Creativity
 // Validate user details by verifying the token and checking the database
-// Called from the other server duing query.html
+// Called from the other server during query.html
 app.post("/verify-user-details", async (req, res) => {
   const { token } = req.body;
 
@@ -235,7 +232,7 @@ app.post("/verify-user-details", async (req, res) => {
   }
 
   try {
-    console.log("Verifying token:", token);
+    // console.log("Verifying token:", token);
 
     // Validate the token
     const decoded = jwt.verify(token, JWTSECRET);
@@ -272,6 +269,63 @@ app.post("/verify-user-details", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+//=========================================================================================================
+// logs.html
+//=========================================================================================================
+app.post("/log-action", (req, res) => {
+  const { username, data_accessed, status } = req.body;
+
+  if (!username || !data_accessed || !status) {
+      return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  const SQL = "INSERT INTO logs (id, username, data_accessed, status) VALUES (UUID_TO_BIN(UUID(), 1), ?, ?, ?)";
+  
+  connection.query(SQL, [username, data_accessed, status], (error) => {
+      if (error) {
+          console.error("Database error while inserting log:", error.message);
+          return res.status(500).json({ message: "Database error" });
+      }
+      res.status(201).json({ message: "Log entry added successfully" });
+  });
+});
+
+
+app.get("/get-logs", (req, res) => {
+    const token = req.headers["authorization"];
+    if (!token) {
+        return res.status(401).send("Token missing");
+    }
+
+    try {
+        const payload = jwt.verify(token, JWTSECRET);
+
+        if (payload.role !== "Admin") {
+            return res.status(403).json({ message: "Access denied: Admins only" });
+        }
+
+        const SQL = "SELECT BIN_TO_UUID(id) AS id, username, timestamp, data_accessed, status FROM logs ORDER BY timestamp DESC";
+
+        connection.query(SQL, (error, results) => {
+            if (error) {
+                console.error("Database error retrieving logs:", error.message);
+                return res.status(500).json({ message: "Database error" });
+            }
+            res.status(200).json(results);
+        });
+
+        // Log access to logs
+        const logSQL = "INSERT INTO logs (id, username, data_accessed, status) VALUES (UUID_TO_BIN(UUID(), 1), ?, ?, ?)";
+        connection.query(logSQL, [payload.username, "Viewed logs", "Success"]);
+    } catch (err) {
+        console.error("Token verification failed:", err.message);
+        res.status(401).send("Token invalid");
+    }
+});
+
+
+
 
 //=========================================================================================================
 

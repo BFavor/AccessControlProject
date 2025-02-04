@@ -46,7 +46,6 @@ function signUp() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, email, password }),
     })
@@ -96,9 +95,6 @@ function login() {
                 document.cookie = "username=" + username;
                 document.body.classList.add("logged-in"); 
                 console.log("Logged in:", username);
-                document.cookie = "username=" + username;
-                document.body.classList.add("logged-in"); 
-                console.log("Logged in:", username);
                 location.href = "http://" + parsedUrl.host + "/totp.html";
             });
         } else if (resp.status === 401) {
@@ -108,7 +104,6 @@ function login() {
         }
     })
     .catch((err) => {
-        console.log("Error during login:", err);
         console.log("Error during login:", err);
     });
 } //  END OF login() function
@@ -167,7 +162,6 @@ function checkTOTP() {
     let stringifiedBody = JSON.stringify({
         totp: document.getElementById("totpCode").value,
         username: username,
-        username: username,
     });
 
     // Send a POST request to server-user/backend-users/index.js to verify the TOTP
@@ -178,13 +172,10 @@ function checkTOTP() {
             "Content-Type": "application/json",
         },
         body: stringifiedBody,
-        body: stringifiedBody,
     })
     .then((resp) => {
         if (resp.status === 200) {
             return resp.text().then((token) => {
-                document.cookie = `JWT=${token}`; 
-                console.log("JWT Cookie set:", document.cookie); 
                 document.cookie = `JWT=${token}`; 
                 console.log("JWT Cookie set:", document.cookie); 
                 location.href = "http://" + parsedUrl.host + "/query.html";
@@ -235,6 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // query.html functions
 //========================================================================================================
 
+
 // Sidebar toggle function
 const toggleSidebar = () => {
     document.body.classList.toggle("open");
@@ -265,7 +257,7 @@ function query() {
     .then((data) => {
 
         if (resp.status === 403) {
-            alert("Access forbidden: Default users cannot query this data.");
+            alert("Access forbidden: Only Lame-o's can query this data.");
             return; // Exit the function for Admin users
         }
 
@@ -308,8 +300,8 @@ function query2() {
         
         console.log("User role:", role);
 
-        if (role === "Admin") {
-            alert("Access forbidden: Admins cannot query this data.");
+        if (role !== "Mid") {
+            alert("Access forbidden: Only Mids can query this data.");
             return; // Exit the function for Admin users
         }
 
@@ -406,3 +398,116 @@ document.addEventListener("DOMContentLoaded", function () {
         homeButton.addEventListener("click", toggleTheme);
     }
 }); // END OF DOM event listener for query.html
+
+
+
+function moveToLogs() {
+    const JWT = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("JWT="))?.split("=")[1];
+
+    if (!JWT) {
+        alert("You are not logged in.");
+        return;
+    }
+
+    fetch("http://localhost:3000/validateToken", {
+        method: "POST",
+        headers: { "Authorization": JWT }
+    })
+    .then(resp => {
+        if (resp.status !== 200) throw new Error("Token invalid");
+        return resp.json();
+    })
+    .then(data => {
+        const { username, role } = data.payload;
+
+        if (role !== "Admin") {
+            alert("Access denied: Admins only.");
+            logAction(username, "Attempted to access logs from query.html", "Failure"); // Log unauthorized attempt
+            return;
+        }
+
+        location.href = "http://" + window.location.host + "/logs.html";
+    })
+    .catch(err => {
+        console.error("Error validating token:", err.message);
+        alert("Failed to verify access.");
+    });
+}
+
+
+function fetchLogs() {
+    const JWT = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("JWT="))?.split("=")[1];
+
+    if (!JWT) {
+        alert("You are not logged in.");
+        return;
+    }
+
+    fetch("http://localhost:3000/validateToken", {
+        method: "POST",
+        headers: { "Authorization": JWT }
+    })
+    .then(resp => {
+        if (resp.status !== 200) throw new Error("Token invalid");
+        return resp.json();
+    })
+    .then(data => {
+        const { username, role } = data.payload;
+
+        if (role !== "Admin") {
+            alert("Access denied: Admins only.");
+            logAction(username, "Attempted to fetch logs from logs.html", "Failure"); // Log unauthorized attempt
+            return;
+        }
+
+        // Proceed with fetching logs if user is an Admin
+        const filter = document.getElementById("filter").value;
+        const logsOutput = document.getElementById("logs-output");
+        logsOutput.value = "Fetching logs...\n";
+
+        fetch("http://localhost:3000/get-logs", {
+            method: "GET",
+            headers: { "Authorization": JWT }
+        })
+        .then((resp) => {
+            if (resp.status === 403) {
+                alert("Access denied: Admins only.");
+                logsOutput.value = "Access denied.";
+                return [];
+            }
+            return resp.json();
+        })
+        .then((logs) => {
+            if (filter !== "all") {
+                logs = logs.filter(log => log.status === filter);
+            }
+
+            if (logs.length === 0) {
+                logsOutput.value = "No logs found.";
+                return;
+            }
+
+            logsOutput.value = logs.map(log => 
+                `ID: ${log.id}\nUsername: ${log.username}\nTimestamp: ${new Date(log.timestamp).toLocaleString()}\nData Accessed: ${log.data_accessed}\nStatus: ${log.status}\n---\n`
+            ).join("");
+        })
+        .catch((err) => {
+            console.error("Error retrieving logs:", err);
+            logsOutput.value = "Failed to fetch logs.";
+        });
+    })
+    .catch(err => {
+        console.error("Error validating token:", err.message);
+        alert("Failed to verify access.");
+    });
+}
+function clearLogs() {
+    document.getElementById("logs-output").value = "";
+}
+
+
+

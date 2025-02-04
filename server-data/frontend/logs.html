@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Viewer</title>
+    <link rel="stylesheet" href="common.css">
+    <script defer src="common.js"></script>
+</head>
+<body>
+    <h1>System Logs</h1>
+
+    <div>
+        <label for="filter">Filter Logs:</label>
+        <select id="filter">
+            <option value="all">All</option>
+            <option value="Success">Success</option>
+            <option value="Failure">Failure</option>
+        </select>
+    </div>
+
+    <button onclick="fetchLogs()">Fetch Logs</button>
+    <button onclick="clearLogs()">Clear</button>
+
+    <textarea id="logs-output" rows="20" placeholder="Logs will be displayed here..." readonly></textarea>
+
+</body>
+</html>
