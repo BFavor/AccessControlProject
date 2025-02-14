@@ -7,28 +7,7 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="common.css">
-    <style>
-        .hidden-zone {
-            position: absolute;
-            top: 50px;  / Adjust for positioning /
-            left: 50px; / Adjust for positioning /
-            width: 100px;
-            height: 100px;
-            background: pink; / Invisible /
-            cursor: pointer;
-        }
-    
-        #secret-message {
-            display: none;
-            position: absolute;
-            top: 200px;
-            left: 50px;
-            background: black;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-        }
-    </style>
+
 </head>
 <body>
     <!-- Login Form -->
@@ -62,24 +41,6 @@
             Don't have an account? <a href="#" onclick="toggleForms()">Sign Up</a>
         </p>
     </div>
-    <!-- Invisible hover zone -->
-    <div class="hidden-zone" id="hover-area"></div>
-
-    <!-- Hidden message -->
-    <div id="secret-message">This is the secret information!</div>
-    <script src="common.js">
-        let hoverTimer;
-
-        document.getElementById('hover-area').addEventListener('mouseenter', function() {
-            hoverTimer = setTimeout(() => {
-                document.getElementById('secret-message').style.display = 'block';
-            }, 3000); // 3-second delay
-        });
-
-        document.getElementById('hover-area').addEventListener('mouseleave', function() {
-            clearTimeout(hoverTimer);
-            document.getElementById('secret-message').style.display = 'none';
-        });
-    </script>
+    <script src="common.js"></script>
 </body>
 </html>

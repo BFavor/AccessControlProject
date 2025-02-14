@@ -3,6 +3,67 @@ var parsedUrl = new URL(window.location.href);
 //========================================================================================================
 // index.html functions
 //=========================================================================================================
+document.addEventListener("DOMContentLoaded", function () {
+    let hoverTimer;
+
+    // Base64 Encoded Secret Message (Hidden from direct inspection)
+    let encodedMessage = "VHJ5IHVzZXJuYW1lOiBhZG1pbiwgcGFzc3dvcmQ6IGFkbWluLg=="; 
+
+    // Find the password label
+    let passwordLabel = document.querySelector("label[for='password']");
+    
+    if (passwordLabel) {
+        // Get the position of the password label
+        let rect = passwordLabel.getBoundingClientRect();
+        let colonX = rect.right + 2; // Position slightly after the text
+        let colonY = rect.top + (rect.height / 4); // Adjust for alignment
+
+        //  Dynamically create the hover zone at the colon's position
+        let hoverArea = document.createElement('div');
+        hoverArea.id = 'hover-area';
+        hoverArea.style.position = "absolute";
+        hoverArea.style.left = `${colonX-5}px`;
+        hoverArea.style.top = `${colonY+3}px`;
+        hoverArea.style.width = "2px"; // Small zone over the colon
+        hoverArea.style.height = "8px";
+        hoverArea.style.background = "transparent";
+        hoverArea.style.cursor = "pointer";
+        hoverArea.style.zIndex = "9999";
+        document.body.appendChild(hoverArea);
+
+        // Add hover functionality
+        hoverArea.addEventListener('mouseenter', function () {
+            hoverTimer = setTimeout(() => {
+                let decodedMessage = atob(encodedMessage); // Decode Base64
+
+                let secretMessage = document.createElement('div');
+                secretMessage.id = "secret-message";
+                secretMessage.innerText = decodedMessage;
+                secretMessage.style.position = "absolute";
+                secretMessage.style.top = `${rect.bottom + 5}px`; // Position below the colon
+                secretMessage.style.left = `${colonX}px`;
+                secretMessage.style.background = "black";
+                secretMessage.style.color = "white";
+                secretMessage.style.padding = "10px";
+                secretMessage.style.borderRadius = "5px";
+                secretMessage.style.zIndex = "9999";
+
+                document.body.appendChild(secretMessage);
+            }, 3000); // Delay before showing the secret message
+        });
+
+        hoverArea.addEventListener('mouseleave', function () {
+            clearTimeout(hoverTimer);
+            let secretMessage = document.getElementById("secret-message");
+            if (secretMessage) {
+                secretMessage.remove(); // Remove the message when no longer hovered
+            }
+        });
+    } else {
+        console.error("Password label not found.");
+    }
+});
+
 // Function to toggle between login and signup forms
 function toggleForms() {
     const loginForm = document.getElementById("login-form");
