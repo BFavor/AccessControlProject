@@ -1,13 +1,17 @@
 version: '3'
 services:
-  # User Database
+  # User Database:
+  # Container Name: accesscontrolproject-mysql-users-1 
   mysql-users:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=example
     volumes:
       - ./sql-users:/docker-entrypoint-initdb.d/:ro
+
+
   # User Management API: Contains only a backend API 
+  # Container Name: accesscontrolproject-server-user-1
   server-user:
     build: ./server-user
     environment:
@@ -24,13 +28,17 @@ services:
     ports:
       - "3000:3000"
   # Other Database 
+  # Container Name: accesscontrolproject-mysql-data-1
   mysql-data:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=example
     volumes:
       - ./sql-data:/docker-entrypoint-initdb.d/:ro
-  # Data API: Contains a backed and frontend 
+  
+  
+  # Data API/Server: Contains a backed and frontend 
+  # Container Name: accesscontrolproject-server-data-1
   server-data:
     build: ./server-data
     environment:
@@ -39,6 +47,7 @@ services:
       - MYSQLHOST=mysql-data
       - MYSQLUSER=root
       - MYSQLPASS=example
+      - JWTSECRET=othersupersecretcode  
     volumes:
       - ./server-data/backend-data:/app/backend-data
       - ./server-data/frontend:/app/frontend

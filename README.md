@@ -11,6 +11,10 @@
 - `sudo docker compose up mysql-users mysql-data -d` To launch the sql databases
 - `sudo docker compose up server-user server-data` To launch the servers
 - `sudo docker compose down --volumes --remove-orphans` To close the servers and sql databases and reclaim allocated resources 
+- `sudo docker exec -it accesscontrolproject-mysql-users-1 mysql -u root -p` in another terminal while the server is running to access the mysql container. Enter the password when prompted, which can be found in the docker-compose.yml file. 
+    - USE users; 
+    - SELECT * FROM users;
+    - exit; 
 
 
 ## Quick Guide: What the <i>hell</i> is Dr. John Spurgeon talking about

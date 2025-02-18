@@ -11,6 +11,7 @@
     <script src="common.js"></script>
 </head>
 <body>
+
     <nav class="sidebar">
         <div class="sidebar-inner">
             <header class="sidebar-header">
@@ -36,13 +37,34 @@
         </div>
     </nav>
 
-  <!-- Query Section -->
-  <div class="login-container">
-    <h1>Database Query</h1>
-    <button class="submit-button" onclick="query()">Query</button>
-    <button class="submit-button" onclick="query2()">Query2</button>
-    <button class="submit-button" onclick="moveToLogs()">Admin-Only</button>
-    <textarea id="response" rows="10" placeholder="Algae != Colons"></textarea>
-</div>
+
+    <div class="profile-container">
+        <h1>User Profile</h1>
+        <div id="profile-view">
+            <img id="profile-picture" src="/uploads/default-picture.png" alt="Profile Picture" class="profile-picture-large" onerror="this.onerror=null; this.src='/uploads/default-picture.jpeg';">
+            <p><strong>Username:</strong> <span id="username">placeholder</span></p>
+            <p><strong>Bio:</strong> <span id="bio">placeholder</span></p>
+            <p><strong>Algae Facts:</strong> <span id="algae-facts">placeholder</span></p>
+            <button id="edit-button">Edit Profile</button>
+        </div>
+    
+        <div id="profile-edit" style="display: none;">
+            <form id="edit-profile-form">
+                <label for="new-bio">Bio:</label>
+                <textarea id="new-bio" name="new-bio"></textarea>
+    
+                <label for="new-facts">Algae Facts:</label>
+                <textarea id="new-facts" name="new-facts"></textarea>
+    
+                <label for="new-profile-picture">Profile Picture:</label>
+                <input type="file" id="new-profile-picture" name="new-profile-picture">
+    
+                <button type="submit">Save Changes</button>
+                <button type="button" id="cancel-button">Cancel</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="common.js"></script>
 </body>
 </html>

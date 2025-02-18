@@ -14,8 +14,35 @@ CREATE TABLE users (
 INSERT INTO users
 VALUES(
     "user",
-    "$2a$04$/jeENqlGeTEkYbhq2l7NWOKSwahliz5jekotuZiXEnVCtkhn5WOTG", 
+    "$2a$04$/jeENqlGeTEkYbhq2l7NWOKSwahliz5jekotuZiXEnVCtkhn5WOTG",
     "3eb7",
     "user@example.com",
+    "Lame-o"
+);
+
+INSERT INTO users
+VALUES(
+    "mid",
+    "$2a$04$7dCJicxwAlJcD0tplhsq7eLQr6ZfA.uhBNZtT1oqXo5HUHAO3A1qW",
+    "6eb7",
+    "mid@random.com",
+    "Mid"
+);
+
+INSERT INTO users
+VALUES(
+    "admin",
+    "$2a$04$YiFe4FbdEFI5PwajEQMJceSnfMY0XacZwAE/riFURR3E28nayILxu",
+    "c3af",
+    "admin@random.com",
     "Admin"
+);
+
+CREATE TABLE logs (
+    id BINARY(16) DEFAULT (UUID_TO_BIN(UUID(), 1)) PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_accessed VARCHAR(255) NOT NULL,
+    status ENUM('Success', 'Failure') NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
